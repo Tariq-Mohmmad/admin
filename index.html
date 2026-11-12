@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>لوحة الإدارة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1ec;--card:#fff;--ink:#14302b;--mute:#66786f;--line:#d9e0d8;--acc:#1f6b5c;--acc-ink:#fff;--warn:#b4690e;--bad:#b3392f;--ok-bg:#dcefe8;--warn-bg:#f8e9d2;--bad-bg:#f6dcd9}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1815;--card:#18241f;--ink:#e6efe9;--mute:#91a79c;--line:#2a3a33;--acc:#52b8a1;--acc-ink:#07201a;--warn:#e2a24a;--bad:#ee8077;--ok-bg:#1d3a31;--warn-bg:#3b2f17;--bad-bg:#3d211e}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{font-family:Tajawal,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.5;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+button,input,textarea{font:inherit;color:inherit}
+.wrap{max-width:640px;margin:0 auto;padding:0 14px 90px}
+header{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:10px;padding:12px 14px;max-width:640px;margin:0 auto}
+header h1{font-size:19px;margin:0;flex:1}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 16px;min-height:44px;font-weight:500;cursor:pointer}
+.btn.pri{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.btn.bad{color:var(--bad)}
+.btn:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--acc);outline-offset:1px}
+.btn:disabled{opacity:.5}
+input[type=text],input[type=email],input[type=password],input[type=number],input[type=tel],input[type=search],input[type=datetime-local],textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px;min-height:46px}
+textarea{min-height:80px;resize:vertical}
+label.f{display:block;margin:0 0 12px;font-size:14px;color:var(--mute)}
+label.f>input,label.f>textarea{margin-top:5px;color:var(--ink);font-size:16px}
+input[dir=ltr]{text-align:left}
+.chips{display:flex;gap:8px;margin:10px 0 14px;overflow-x:auto}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:7px 16px;white-space:nowrap;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.item .t{flex:1;min-width:0}
+.item b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item small{color:var(--mute);display:block}
+.tag{font-size:12px;border-radius:99px;padding:2px 10px;background:var(--ok-bg);color:var(--acc);white-space:nowrap}
+.tag.w{background:var(--warn-bg);color:var(--warn)}
+.tag.b{background:var(--bad-bg);color:var(--bad)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:18px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.sw{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sw input{width:26px;height:26px;accent-color:var(--acc)}
+h2{font-size:17px;margin:18px 0 10px;display:flex;align-items:center;justify-content:space-between}
+.empty{text-align:center;color:var(--mute);padding:28px 10px}
+.fab{position:fixed;inset-inline-start:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));min-height:54px;border-radius:99px;padding:0 22px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.sheet>div{background:var(--bg);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+.sheet h3{margin:0 0 14px;font-size:18px}
+#toast{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:12px;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.on{opacity:1}
+#login{max-width:380px;margin:12vh auto 0;padding:0 18px}
+#login h1{font-size:26px;margin:0 0 4px}#login p{color:var(--mute);margin:0 0 22px}
+.err{color:var(--bad);min-height:22px;font-size:14px}
+[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="toast" role="status"></div>
+
+<section id="login" hidden>
+  <h1>لوحة الإدارة</h1>
+  <p>سجّل دخولك لإدارة المستخدمين وجهات الاتصال.</p>
+  <label class="f">البريد الإلكتروني<input type="email" id="em" dir="ltr" autocomplete="username"></label>
+  <label class="f">كلمة المرور<input type="password" id="pw" dir="ltr" autocomplete="current-password"></label>
+  <div class="err" id="lerr"></div>
+  <button class="btn pri" id="lbtn" style="width:100%">دخول</button>
+</section>
+
+<div id="app" hidden>
+  <header>
+    <button class="btn" id="back" hidden aria-label="رجوع">‹ رجوع</button>
+    <h1 id="title">المستخدمون</h1>
+    <button class="btn" id="out">خروج</button>
+  </header>
+  <main class="wrap" id="main"></main>
+</div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {getFirestore,collection,doc,getDocs,setDoc,updateDoc,deleteDoc,addDoc,getDoc,Timestamp,query,orderBy} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+/* الصق هون إعدادات مشروعك: Firebase Console ← Project settings ← Your apps ← Web app */
+const firebaseConfig = {
+  apiKey: "PASTE_API_KEY",
+  authDomain: "data-45df3.firebaseapp.com",
+  projectId: "data-45df3",
+  appId: "PASTE_APP_ID"
+};
+const USERS = "users";      // اسم الـ collection الأب
+const SUB = "contacts";     // اسم الـ subcollection
+
+const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const toast = m => { const t = $("#toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove("on"), 2400); };
+const pad = n => String(n).padStart(2, "0");
+const toLocal = ts => { if (!ts?.toDate) return ""; const d = ts.toDate(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const fmt = ts => ts?.toDate ? ts.toDate().toLocaleString("ar", {dateStyle:"medium", timeStyle:"short"}) : "—";
+const fromLocal = v => v ? Timestamp.fromDate(new Date(v)) : null;
+
+let users = [], filter = "all", q = "", cur = null, contacts = [];
+
+/* ---------- auth ---------- */
+onAuthStateChanged(auth, u => {
+  $("#login").hidden = !!u; $("#app").hidden = !u;
+  if (u) showUsers();
+});
+$("#lbtn").onclick = async () => {
+  $("#lerr").textContent = ""; $("#lbtn").disabled = true;
+  try { await signInWithEmailAndPassword(auth, $("#em").value.trim(), $("#pw").value); }
+  catch { $("#lerr").textContent = "البريد أو كلمة المرور غير صحيحة."; }
+  $("#lbtn").disabled = false;
+};
+$("#out").onclick = () => signOut(auth);
+$("#back").onclick = showUsers;
+
+/* ---------- users list ---------- */
+const state = u => {
+  const exp = u.expiryDate?.toDate?.();
+  if (!u.isActive) return ["معطّل", "b"];
+  if (exp && exp < new Date()) return ["منتهي", "w"];
+  return ["فعّال", ""];
+};
+async function showUsers() {
+  cur = null; $("#back").hidden = true; $("#title").textContent = "المستخدمون";
+  $("#main").innerHTML = '<div class="empty">جاري التحميل…</div>';
+  try { users = (await getDocs(collection(db, USERS))).docs.map(d => ({id: d.id, ...d.data()})); }
+  catch (e) { $("#main").innerHTML = `<div class="empty">تعذّر التحميل. تأكد من قواعد الأمان وإعدادات المشروع.<br><small dir="ltr">${esc(e.code)}</small></div>`; return; }
+  renderUsers();
+}
+function renderUsers() {
+  const chips = [["all","الكل"],["active","فعّال"],["expired","منتهي/معطّل"]];
+  $("#main").innerHTML = `
+    <div class="wrap" style="padding:0">
+      <input type="search" id="q" placeholder="ابحث بالاسم أو المعرّف" value="${esc(q)}">
+      <div class="chips">${chips.map(([k,l]) => `<button class="chip" data-f="${k}" aria-pressed="${filter===k}">${l}</button>`).join("")}</div>
+      <div id="ul"></div>
+    </div>
+    <button class="btn pri fab" id="addu">+ مستخدم</button>`;
+  $("#q").oninput = e => { q = e.target.value; list(); };
+  document.querySelectorAll(".chip").forEach(b => b.onclick = () => { filter = b.dataset.f; renderUsers(); });
+  $("#addu").onclick = newUser;
+  list();
+}
+function list() {
+  const rows = users.filter(u => {
+    const s = state(u)[0];
+    if (filter === "active" && s !== "فعّال") return false;
+    if (filter === "expired" && s === "فعّال") return false;
+    const t = (u.name + " " + u.id).toLowerCase();
+    return t.includes(q.toLowerCase());
+  });
+  $("#ul").innerHTML = rows.length ? rows.map(u => { const [l,c] = state(u); return `
+    <div class="item" data-id="${esc(u.id)}" tabindex="0">
+      <div class="t"><b>${esc(u.name || u.id)}</b><small dir="ltr" style="text-align:right">${esc(u.id)}</small><small>ينتهي: ${fmt(u.expiryDate)}</small></div>
+      <span class="tag ${c}">${l}</span>
+    </div>`; }).join("") : '<div class="empty">ما في نتائج.</div>';
+  document.querySelectorAll("#ul .item").forEach(el => el.onclick = () => openUser(el.dataset.id));
+}
+function newUser() {
+  sheet("مستخدم جديد", `
+    <label class="f">معرّف المستند (ID)<input type="text" id="nid" dir="ltr" placeholder="user_2"></label>
+    <label class="f">الاسم<input type="text" id="nname"></label>
+    <label class="f">تاريخ الانتهاء<input type="datetime-local" id="nexp" dir="ltr"></label>`,
+  async () => {
+    const id = $("#nid").value.trim(); if (!id || id.includes("/")) return toast("المعرّف مطلوب ولا يحتوي /");
+    if ((await getDoc(doc(db, USERS, id))).exists()) return toast("المعرّف موجود مسبقاً");
+    await setDoc(doc(db, USERS, id), {name: $("#nname").value.trim(), isActive: true, createdAt: Timestamp.now(), expiryDate: fromLocal($("#nexp").value)});
+    toast("تمت الإضافة"); closeSheet(); showUsers();
+  });
+}
+
+/* ---------- single user ---------- */
+async function openUser(id) {
+  cur = users.find(u => u.id === id); if (!cur) return;
+  $("#back").hidden = false; $("#title").textContent = cur.name || cur.id;
+  $("#main").innerHTML = `
+    <div class="panel">
+      <label class="f">الاسم<input type="text" id="un" value="${esc(cur.name)}"></label>
+      <label class="f">تاريخ الانتهاء<input type="datetime-local" id="ue" dir="ltr" value="${toLocal(cur.expiryDate)}"></label>
+      <label class="sw"><span>الحساب فعّال</span><input type="checkbox" id="ua" ${cur.isActive ? "checked" : ""}></label>
+      <div class="row"><button class="btn pri" id="us">حفظ التغييرات</button><button class="btn bad" id="ud">حذف المستخدم</button></div>
+    </div>
+    <h2>جهات الاتصال <button class="btn pri" id="addc">+ إضافة</button></h2>
+    <div id="cl"><div class="empty">جاري التحميل…</div></div>`;
+  $("#us").onclick = async () => {
+    await updateDoc(doc(db, USERS, id), {name: $("#un").value.trim(), isActive: $("#ua").checked, expiryDate: fromLocal($("#ue").value)});
+    Object.assign(cur, {name: $("#un").value.trim(), isActive: $("#ua").checked, expiryDate: fromLocal($("#ue").value)});
+    $("#title").textContent = cur.name || cur.id; toast("تم الحفظ");
+  };
+  $("#ud").onclick = () => confirmSheet(`حذف «${cur.name || cur.id}» وكل جهات الاتصال تبعه؟ ما بتقدر تتراجع.`, async () => {
+    const snap = await getDocs(collection(db, USERS, id, SUB));
+    await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+    await deleteDoc(doc(db, USERS, id)); toast("تم الحذف"); showUsers();
+  });
+  $("#addc").onclick = () => contactSheet();
+  loadContacts();
+}
+async function loadContacts() {
+  try { contacts = (await getDocs(collection(db, USERS, cur.id, SUB))).docs.map(d => ({id: d.id, ...d.data()})); }
+  catch (e) { $("#cl").innerHTML = `<div class="empty">تعذّر التحميل<br><small dir="ltr">${esc(e.code)}</small></div>`; return; }
+  $("#cl").innerHTML = contacts.length ? contacts.map(c => `
+    <div class="item" data-c="${esc(c.id)}" tabindex="0">
+      <div class="t"><b>${esc(c.name || c.id)}</b><small dir="ltr" style="text-align:right">${esc(c.phone)}</small>${c.details ? `<small>${esc(c.details)}</small>` : ""}</div>
+      <span class="tag ${c.balance < 0 ? "b" : ""}" dir="ltr">${esc(c.balance ?? 0)}</span>
+    </div>`).join("") : '<div class="empty">ما في جهات اتصال. اضغط «إضافة» لأول جهة.</div>';
+  document.querySelectorAll("#cl .item").forEach(el => el.onclick = () => contactSheet(contacts.find(c => c.id === el.dataset.c)));
+}
+function contactSheet(c) {
+  const e = !!c; c = c || {};
+  sheet(e ? "تعديل جهة اتصال" : "جهة اتصال جديدة", `
+    <label class="f">الاسم<input type="text" id="cn" value="${esc(c.name)}"></label>
+    <label class="f">الهاتف<input type="tel" id="cp" dir="ltr" value="${esc(c.phone)}"></label>
+    <label class="f">الرصيد<input type="number" id="cb" dir="ltr" step="any" value="${esc(c.balance ?? 0)}"></label>
+    <label class="f">التفاصيل<textarea id="cd">${esc(c.details)}</textarea></label>
+    <div class="row">
+      <label class="f">خط العرض (lat)<input type="number" id="la" dir="ltr" step="any" value="${esc(c.lat ?? 0)}"></label>
+      <label class="f">خط الطول (lng)<input type="number" id="lo" dir="ltr" step="any" value="${esc(c.lng ?? 0)}"></label>
+    </div>`,
+  async () => {
+    const data = {name: $("#cn").value.trim(), phone: $("#cp").value.trim(), balance: Number($("#cb").value) || 0, details: $("#cd").value.trim(), lat: Number($("#la").value) || 0, lng: Number($("#lo").value) || 0};
+    if (e) await updateDoc(doc(db, USERS, cur.id, SUB, c.id), data);
+    else await addDoc(collection(db, USERS, cur.id, SUB), {...data, createdAt: Timestamp.now()});
+    toast("تم الحفظ"); closeSheet(); loadContacts();
+  }, e ? async () => { await deleteDoc(doc(db, USERS, cur.id, SUB, c.id)); toast("تم الحذف"); closeSheet(); loadContacts(); } : null);
+}
+
+/* ---------- sheets ---------- */
+function sheet(title, body, onSave, onDelete) {
+  closeSheet();
+  const s = document.createElement("div"); s.className = "sheet"; s.id = "sh";
+  s.innerHTML = `<div role="dialog" aria-label="${esc(title)}"><h3>${esc(title)}</h3>${body}
+    <div class="row"><button class="btn pri" id="sv">حفظ</button><button class="btn" id="cx">إلغاء</button></div>
+    ${onDelete ? '<button class="btn bad" id="dl" style="width:100%;margin-top:10px">حذف جهة الاتصال</button>' : ""}</div>`;
+  s.onclick = ev => { if (ev.target === s) closeSheet(); };
+  document.body.appendChild(s);
+  $("#cx").onclick = closeSheet;
+  $("#sv").onclick = () => guard($("#sv"), onSave);
+  if (onDelete) $("#dl").onclick = () => guard($("#dl"), onDelete);
+}
+function confirmSheet(msg, onYes) {
+  closeSheet();
+  const s = document.createElement("div"); s.className = "sheet"; s.id = "sh";
+  s.innerHTML = `<div role="alertdialog"><h3>تأكيد</h3><p>${esc(msg)}</p><div class="row"><button class="btn bad" id="y">نعم، احذف</button><button class="btn" id="n">إلغاء</button></div></div>`;
+  document.body.appendChild(s);
+  $("#n").onclick = closeSheet; $("#y").onclick = () => guard($("#y"), async () => { closeSheet(); await onYes(); });
+}
+const closeSheet = () => $("#sh")?.remove();
+async function guard(btn, fn) {
+  btn.disabled = true;
+  try { await fn(); } catch (e) { toast("فشلت العملية: " + (e.code || e.message)); }
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>
